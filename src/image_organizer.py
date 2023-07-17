@@ -47,7 +47,7 @@ class MainWindow(QWidget):
 
         # Select Button
         self.import_button =  QtWidgets.QPushButton('Import', self)
-        self.import_button.clicked.connect(self.create_working_directory)
+        self.import_button.clicked.connect(lambda: create_working_directory(self, self))
         self.import_button.setDisabled(True)
 
         # new category input
@@ -224,18 +224,6 @@ class MainWindow(QWidget):
 
 
 
-    def create_working_directory(self):
-        ''' Assigns the input path to the current working directory '''
-        if os.path.exists(self.selection_input.text()) and self.selection_input.text() != "":
-            self.input_text = self.selection_input.text()
-            self.working_directory = self.input_text
-            os.chdir(self.working_directory)
-            self.clear_categories_tree()
-            self.clear_cat_selector()
-            self.loading_msg_label.setText("Importing Images . . .")
-        else:
-            self.invalid_path = QMessageBox(self)
-            self.invalid_path.warning(self, "Attention", "Invalid file path!")
 
     def add_wd_to_tree(self):
         ''' Adds the working directory as the root item in the category view '''

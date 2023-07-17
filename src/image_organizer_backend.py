@@ -32,3 +32,16 @@ def loading_msg_check(self, widget):
             widget.clear_thumbnails()
             widget.clear_img_display()
         widget.build_dict()
+
+def create_working_directory(self, widget):
+    ''' Assigns the input path to the current working directory '''
+    if os.path.exists(widget.selection_input.text()) and widget.selection_input.text() != "":
+        widget.input_text = widget.selection_input.text()
+        widget.working_directory = widget.input_text
+        os.chdir(widget.working_directory)
+        widget.clear_categories_tree()
+        widget.clear_cat_selector()
+        widget.loading_msg_label.setText("Importing Images . . .")
+    else:
+        widget.invalid_path = QMessageBox(self)
+        widget.invalid_path.warning(self, "Attention", "Invalid file path!")
