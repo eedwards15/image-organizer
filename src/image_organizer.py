@@ -120,7 +120,7 @@ class MainWindow(QWidget):
         self.loading_msg_label.setFont(self.itallic_font)
         self.loading_msg_label.setSizePolicy( QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.loading_msg_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
-        self.loading_msg_label.textChanged[str].connect(self.loading_msg_check)
+        self.loading_msg_label.textChanged[str].connect(lambda: loading_msg_check(self, self))   
 
         # version number
         self.version_label = QLineEdit(self)
@@ -222,14 +222,7 @@ class MainWindow(QWidget):
 
         self.build_selector()
 
-    def loading_msg_check(self):
-        ''' Clears all images and executes the build dictionary function when the status bar reads "Importing Images... '''
-        if "Importing Images . . ." in self.loading_msg_label.text():
-            QApplication.processEvents()
-            if self.bottom_layout.count() != 0:
-                self.clear_thumbnails()
-                self.clear_img_display()
-            self.build_dict()
+
 
     def create_working_directory(self):
         ''' Assigns the input path to the current working directory '''
@@ -317,8 +310,7 @@ class MainWindow(QWidget):
         self.interactive_widgets_status()
         self.image_index = 0
         self.image = QImage(self.thumb_list[self.image_index])
-        self.image_display.setPixmap(QPixmap(self.image).scaled(
-            700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
+        self.image_display.setPixmap(QPixmap(self.image).scaled(700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
         self.get_current_image()
         self.highlight_selected()
 

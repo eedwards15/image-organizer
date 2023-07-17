@@ -23,3 +23,12 @@ def load_btn_status(self, widget):
         widget.import_button.setDisabled(False)
     elif widget.selection_input.text() == "":
         widget.import_button.setDisabled(True)
+
+def loading_msg_check(self, widget):
+    ''' Clears all images and executes the build dictionary function when the status bar reads "Importing Images... '''
+    if "Importing Images . . ." in widget.loading_msg_label.text():
+        QApplication.processEvents()
+        if widget.bottom_layout.count() != 0:
+            widget.clear_thumbnails()
+            widget.clear_img_display()
+        widget.build_dict()
