@@ -4,15 +4,10 @@ from PyQt6.QtWidgets import QApplication, QFrame, QFileDialog, QGraphicsPixmapIt
     QGraphicsView, QGridLayout,QLineEdit, QLabel, QMessageBox, QSizePolicy, QSplitter, QWidget
 from PyQt6.QtGui import QImage, QPixmap
 import sys, os, platform, shutil
+
+from click_frame import ClickFrame
+
 # qtmodern.styles
-
-
-class ClickFrame(QtWidgets.QFrame):
-    clicked = QtCore.pyqtSignal()
-
-    def mousePressEvent(self, event):
-        self.clicked.emit()
-        QtWidgets.QFrame.mousePressEvent(self, event)
 
 class MainWindow(QWidget):
 
@@ -46,6 +41,7 @@ class MainWindow(QWidget):
         self.selection_input.setFont(self.itallic_font)
         self.selection_input.resize(350,33)
         self.selection_input.textChanged[str].connect(self.load_btn_status)
+
         # Select Button
         self.import_button =  QtWidgets.QPushButton('Import', self)
         self.import_button.clicked.connect(self.create_working_directory)
@@ -58,6 +54,7 @@ class MainWindow(QWidget):
         self.new_category_input.resize(350,33)
         self.new_category_input.textChanged[str].connect(self.create_btn_status)
         self.new_category_input.setDisabled(True)
+
         # Create Button
         self.create_button =  QtWidgets.QPushButton('Create', self)
         self.create_button.setDisabled(True)
@@ -69,24 +66,18 @@ class MainWindow(QWidget):
         self.category_view.setSortingEnabled(True)
         self.category_view.sortByColumn(0,QtCore.Qt.SortOrder.AscendingOrder)
         self.category_view.setAlternatingRowColors(True)
-        self.category_view.setSizePolicy(
-            QSizePolicy.Policy.Preferred,
-            QSizePolicy.Policy.Preferred)
+        self.category_view.setSizePolicy(QSizePolicy.Policy.Preferred,QSizePolicy.Policy.Preferred)
 
         # Organize button and label
         self.organization_label = QtWidgets.QLabel('This operation cannot be undone!')
         self.organization_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.organization_label.setFont(self.itallic_font)
         self.organization_label.setWordWrap(True)
-        self.organization_label.setSizePolicy(
-            QSizePolicy.Policy.MinimumExpanding,
-            QSizePolicy.Policy.MinimumExpanding)
+        self.organization_label.setSizePolicy(QSizePolicy.Policy.MinimumExpanding,QSizePolicy.Policy.MinimumExpanding)
         self.organize_button = QtWidgets.QPushButton('Organize', self)
         self.organize_button.setFont(self.big_font)
         self.organize_button.setFixedWidth(125)
-        self.organize_button.setSizePolicy(
-            QSizePolicy.Policy.Fixed,
-            QSizePolicy.Policy.Preferred)
+        self.organize_button.setSizePolicy(QSizePolicy.Policy.Fixed,QSizePolicy.Policy.Preferred)
         self.organize_button.clicked.connect(self.organize_warning_popup)
         self.organize_button.setDisabled(True)
 
@@ -107,45 +98,35 @@ class MainWindow(QWidget):
         self.previous_button = QtWidgets.QPushButton("<", self)
         self.previous_button.setFont(self.big_font)
         self.previous_button.setMaximumWidth(25)
-        self.previous_button.setSizePolicy(
-            QSizePolicy.Policy.Fixed,
-            QSizePolicy.Policy.Preferred)
+        self.previous_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
         self.previous_button.clicked.connect(self.previous_image)
         self.previous_button.setDisabled(True)
 
         self.next_button = QtWidgets.QPushButton(">", self)
         self.next_button.setFont(self.big_font)
         self.next_button.setMaximumWidth(25)
-        self.next_button.setSizePolicy(
-            QSizePolicy.Policy.Fixed,
-            QSizePolicy.Policy.Preferred)
+        self.next_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
         self.next_button.clicked.connect(self.next_image)
         self.next_button.setDisabled(True)
 
         # status bar
         self.loading_msg_label = QLineEdit(self)
-        self.loading_msg_label.setStyleSheet(
-            "border: 1px solid rgb(42,42,42); background-color:transparent; color: rgb(127,127,127);")
+        self.loading_msg_label.setStyleSheet( "border: 1px solid rgb(42,42,42); background-color:transparent; color: rgb(127,127,127);")
         self.loading_msg_label.setText("")
         self.loading_msg_label.setDisabled(True)
         self.loading_msg_label.setFont(self.itallic_font)
-        self.loading_msg_label.setSizePolicy(
-            QSizePolicy.Policy.Expanding,
-            QSizePolicy.Policy.Fixed)
+        self.loading_msg_label.setSizePolicy( QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.loading_msg_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.loading_msg_label.textChanged[str].connect(self.loading_msg_check)
 
         # version number
         self.version_label = QLineEdit(self)
-        self.version_label.setStyleSheet(
-            "border: 1px solid rgb(42,42,42); background-color:transparent; color: rgb(127,127,127);")
+        self.version_label.setStyleSheet( "border: 1px solid rgb(42,42,42); background-color:transparent; color: rgb(127,127,127);")
         self.version_label.setText('Created by: Daniel Lukas v0.3.2alpha')
         self.version_label.setDisabled(True)
         self.version_label.setFont(self.itallic_font)
         self.version_label.setFixedWidth(225)
-        self.version_label.setSizePolicy(
-            QSizePolicy.Policy.Fixed,
-            QSizePolicy.Policy.Fixed)
+        self.version_label.setSizePolicy(QSizePolicy.Policy.Fixed,QSizePolicy.Policy.Fixed)
         self.version_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
 
     #######################################################################
@@ -158,17 +139,13 @@ class MainWindow(QWidget):
         # creates the right_layout and adds objects
         self.right_frame = QtWidgets.QFrame(self)
         self.right_frame.setFrameShape(QFrame.Shape.StyledPanel)
-        self.right_frame.setSizePolicy(
-                QSizePolicy.Policy.Preferred,
-                QSizePolicy.Policy.Preferred)
+        self.right_frame.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         self.right_layout = QtWidgets.QVBoxLayout(self.right_frame)
 
         # selection Layout
         self.top_frame = QtWidgets.QFrame(self)
         self.top_frame.setFrameShape(QFrame.Shape.StyledPanel)
-        self.top_frame.setSizePolicy(
-                QSizePolicy.Policy.Preferred,
-                QSizePolicy.Policy.Fixed)
+        self.top_frame.setSizePolicy(QSizePolicy.Policy.Preferred,QSizePolicy.Policy.Fixed)
         self.path_selection_layout = QtWidgets.QHBoxLayout(self.top_frame)
         self.path_selection_layout.addWidget(self.browse_button)
         self.path_selection_layout.addWidget(self.selection_input)
@@ -199,9 +176,7 @@ class MainWindow(QWidget):
 
         # Creates the horizontal splitter
         self.horizontal_splitter = QSplitter(QtCore.Qt.Orientation.Horizontal)
-        self.horizontal_splitter.setSizePolicy(
-            QSizePolicy.Policy.Preferred,
-            QSizePolicy.Policy.Preferred)
+        self.horizontal_splitter.setSizePolicy(QSizePolicy.Policy.Preferred,QSizePolicy.Policy.Preferred)
         self.horizontal_splitter.addWidget(self.left_frame)
         self.horizontal_splitter.addWidget(self.right_frame)
         self.horizontal_splitter.setStretchFactor(1,5)
@@ -217,9 +192,7 @@ class MainWindow(QWidget):
 
         self.bottom_frame = QtWidgets.QFrame(self)
         self.bottom_frame.setFrameShape(QFrame.Shape.StyledPanel)
-        self.bottom_frame.setSizePolicy(
-                QSizePolicy.Policy.Preferred,
-                QSizePolicy.Policy.Minimum)
+        self.bottom_frame.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum)
         self.bottom_layout = QtWidgets.QHBoxLayout(self.bottom_frame)
         self.bottom_layout.setSpacing(10)
         self.scrolling_grid_area.setWidget(self.bottom_frame)
@@ -361,7 +334,6 @@ class MainWindow(QWidget):
         self.get_current_image()
         self.highlight_selected()
 
-
     def img_extention_check(self):
         ''' Checks all files in the working directory for supported image formats '''
 
@@ -410,9 +382,7 @@ class MainWindow(QWidget):
             QSizePolicy.Policy.Fixed)
         # Add Button
         self.add_button =  QtWidgets.QPushButton('Add', self)
-        self.add_button.setSizePolicy(
-            QSizePolicy.Policy.Fixed,
-                QSizePolicy.Policy.Fixed)
+        self.add_button.setSizePolicy( QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self.add_button.clicked.connect(self.build_file_operation_dict)
         self.add_button.setDisabled(True)
         # Creates the category selector layout
@@ -584,7 +554,10 @@ class MainWindow(QWidget):
                 self.category_folder_set.add(self.category_name)
 
         for self.category_name in self.category_folder_set:
-            os.mkdir(f"{self.category_name}")
+            # creates a folder for every category
+            # if the folder already exists, it skips the creation
+            if os.path.exists(self.category_name) == False:
+                os.mkdir(f"{self.category_name}")
         
         for self.current_image, self.category_name in self.file_operation_dict.items():
             if self.current_os == "Linux" or self.current_os == "Darwin":
