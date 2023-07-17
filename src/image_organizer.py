@@ -61,7 +61,7 @@ class MainWindow(QWidget):
         # Create Button
         self.create_button =  QtWidgets.QPushButton('Create', self)
         self.create_button.setDisabled(True)
-        self.create_button.clicked.connect(self.create_new_category)
+        self.create_button.clicked.connect(lambda: create_new_category(self, self))
 
         # Category Tree View
         self.category_view = QtWidgets.QTreeWidget(self)
@@ -223,17 +223,7 @@ class MainWindow(QWidget):
         self.build_selector()
 
 
-    def create_new_category(self):
-        ''' Adds a new category to the category_view and category_selector widgets '''
 
-        if self.new_category_input.text() != "":
-            self.category = QtWidgets.QTreeWidgetItem(self.WD_item,[self.new_category_input.text()])
-            self.category_view.addTopLevelItem(self.category)
-            self.category_selector.addItem(self.new_category_input.text())
-            self.category_selector.model().sort(0, QtCore.Qt.SortOrder.AscendingOrder)
-            self.new_category_input.clear()
-            QApplication.processEvents()
-            self.interactive_widgets_status()
 
     def create_btn_status(self):
         ''' Disables and enables the create button when the conditions are met '''

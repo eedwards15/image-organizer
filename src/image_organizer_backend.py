@@ -62,3 +62,15 @@ def add_wd_to_tree(self, widget):
         widget.image_folder = widget.working_directory.split("\\")[-1]
         widget.WD_item = QtWidgets.QTreeWidgetItem(widget.category_view, [widget.image_folder])
         widget.category_view.addTopLevelItem(widget.WD_item)
+
+def create_new_category(self, widget):
+    ''' Adds a new category to the category_view and category_selector widgets '''
+
+    if widget.new_category_input.text() != "":
+        widget.category = QtWidgets.QTreeWidgetItem(widget.WD_item,[widget.new_category_input.text()])
+        widget.category_view.addTopLevelItem(widget.category)
+        widget.category_selector.addItem(widget.new_category_input.text())
+        widget.category_selector.model().sort(0, QtCore.Qt.SortOrder.AscendingOrder)
+        widget.new_category_input.clear()
+        QApplication.processEvents()
+        widget.interactive_widgets_status()
