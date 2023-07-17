@@ -6,6 +6,8 @@ from PyQt6.QtGui import QImage, QPixmap
 import sys, os, platform, shutil
 
 from click_frame import ClickFrame
+from constants import *
+from image_organizer_backend import *
 
 # qtmodern.styles
 
@@ -14,9 +16,9 @@ class MainWindow(QWidget):
     def __init__(self, *args, **kwargs):
         '''MainWindow Constructor'''
         super().__init__(*args, **kwargs)
-        self.title = 'Image Organizer'
-        self.width = 1280
-        self.height = 960
+        self.title = Constants.TITLE
+        self.width = Constants.WIDTH
+        self.height = Constants.HEIGHT
         self.initUI()
 
     def initUI(self):
@@ -33,14 +35,15 @@ class MainWindow(QWidget):
         # Browse Directory Button
         self.browse_button = QtWidgets.QPushButton('Browse', self)
         self.browse_button.setMaximumWidth(75)
-        self.browse_button.clicked.connect(self.folder_select)
+        #self.browse_button.clicked.connect(self.folder_select)
+        self.browse_button.clicked.connect(lambda: folder_select(self, self))
 
         # Select Directory and input
         self.selection_input = QtWidgets.QLineEdit(self)
         self.selection_input.setPlaceholderText("Path to Folder")
         self.selection_input.setFont(self.itallic_font)
         self.selection_input.resize(350,33)
-        self.selection_input.textChanged[str].connect(self.load_btn_status)
+        self.selection_input.textChanged[str].connect(lambda: load_btn_status(self, self))
 
         # Select Button
         self.import_button =  QtWidgets.QPushButton('Import', self)
@@ -218,21 +221,6 @@ class MainWindow(QWidget):
         self.setLayout(self.main_layout)
 
         self.build_selector()
-
-    def load_btn_status(self):
-        ''' Disables and enables the load button when the conditions are met '''
-        if self.selection_input.text() != "":
-            self.import_button.setDisabled(False)
-        elif self.selection_input.text() == "":
-            self.import_button.setDisabled(True)
-
-    def folder_select(self):
-        ''' Assignes the selected path to the input box '''
-        self.chosen_directory = QFileDialog.getExistingDirectory(self)
-        if self.chosen_directory != "":
-            self.selection_input.clear()
-        self.selection_input.insert(self.chosen_directory)
-        self.input_text = self.selection_input.text()
 
     def loading_msg_check(self):
         ''' Clears all images and executes the build dictionary function when the status bar reads "Importing Images... '''
