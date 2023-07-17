@@ -45,3 +45,20 @@ def create_working_directory(self, widget):
     else:
         widget.invalid_path = QMessageBox(self)
         widget.invalid_path.warning(self, "Attention", "Invalid file path!")
+
+def add_wd_to_tree(self, widget):
+    ''' Adds the working directory as the root item in the category view '''
+    widget.current_os = platform.system()
+
+    if "/" in widget.working_directory:
+        widget.clear_categories_tree()
+        widget.image_folder = widget.working_directory.split("/")[-1]
+        widget.WD_item = QtWidgets.QTreeWidgetItem(widget.category_view, [widget.image_folder])
+        widget.WD_item.setExpanded(True)
+        widget.category_view.addTopLevelItem(self.WD_item)
+        widget.new_category_input.setDisabled(False)
+    elif "\\" in widget.working_directory:
+        widget.clear_categories_tree()
+        widget.image_folder = widget.working_directory.split("\\")[-1]
+        widget.WD_item = QtWidgets.QTreeWidgetItem(widget.category_view, [widget.image_folder])
+        widget.category_view.addTopLevelItem(widget.WD_item)

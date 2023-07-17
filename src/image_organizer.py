@@ -223,25 +223,6 @@ class MainWindow(QWidget):
         self.build_selector()
 
 
-
-
-    def add_wd_to_tree(self):
-        ''' Adds the working directory as the root item in the category view '''
-        self.current_os = platform.system()
-
-        if "/" in self.working_directory:
-            self.clear_categories_tree()
-            self.image_folder = self.working_directory.split("/")[-1]
-            self.WD_item = QtWidgets.QTreeWidgetItem(self.category_view, [self.image_folder])
-            self.WD_item.setExpanded(True)
-            self.category_view.addTopLevelItem(self.WD_item)
-            self.new_category_input.setDisabled(False)
-        elif "\\" in self.working_directory:
-            self.clear_categories_tree()
-            self.image_folder = self.working_directory.split("\\")[-1]
-            self.WD_item = QtWidgets.QTreeWidgetItem(self.category_view, [self.image_folder])
-            self.category_view.addTopLevelItem(self.WD_item)
-
     def create_new_category(self):
         ''' Adds a new category to the category_view and category_selector widgets '''
 
@@ -285,7 +266,7 @@ class MainWindow(QWidget):
         if self.sorted_image_files != []:
             self.populate_grid_view()
             self.display_images()
-            self.add_wd_to_tree()
+            add_wd_to_tree(self,self)
         elif self.sorted_image_files == []:
             self.loading_msg_label.setText("No valid image files found. Please choose a different folder.")
 
