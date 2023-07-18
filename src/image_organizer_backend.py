@@ -277,3 +277,15 @@ def highlight_selected(self, widget):
     widget.thumb_selected = widget.findChild(ClickFrame, widget.thumb_list[widget.image_index])
     widget.thumb_selected.setStyleSheet("border: 1px solid rgb(42, 130, 218); background-color: rgb(42, 130, 218); color: white;")
     print(widget.thumb_list[widget.image_index])
+
+
+def show_category_if_categorized(self, widget):
+    ''' If an image has been added to a category,
+    that category becomes the current item in the selector when the image is selected '''
+
+    get_current_image(self,widget)
+    if widget.current_image in widget.file_operation_dict.keys():
+        widget.category_index = widget.category_selector.findText(widget.file_operation_dict[widget.current_image], QtCore.Qt.MatchFlag.MatchFixedString)
+        widget.category_selector.setCurrentIndex(self.category_index)
+    else:
+        widget.category_selector.setCurrentIndex(0)
