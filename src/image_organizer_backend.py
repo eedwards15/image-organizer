@@ -29,8 +29,8 @@ def loading_msg_check(self, widget):
     if "Importing Images . . ." in widget.loading_msg_label.text():
         QApplication.processEvents()
         if widget.bottom_layout.count() != 0:
-            widget.clear_thumbnails()
-            widget.clear_img_display()
+            clear_thumbnails(self, widget)
+            clear_img_display(self,widget)
         build_dict(self,widget)
 
 def create_working_directory(self, widget):
@@ -40,7 +40,7 @@ def create_working_directory(self, widget):
         widget.working_directory = widget.input_text
         os.chdir(widget.working_directory)
         widget.clear_categories_tree()
-        widget.clear_cat_selector()
+        clear_cat_selector(self, widget)
         widget.loading_msg_label.setText("Importing Images . . .")
     else:
         widget.invalid_path = QMessageBox(self)
@@ -139,7 +139,7 @@ def thumbnail_click(self, widget):
 def warning_button_clicked(self, widget):
     ''' If the user clicks the yes button, the file operations are executed '''
     if widget.warning_popup == QMessageBox.StandardButton.Yes:
-        widget.organize_images()
+        organize_images(self,widget)
     elif widget.warning_popup == QMessageBox.Cancel:
         widget.last_chance_message_box.Ignore()
 
@@ -270,7 +270,7 @@ def organize_warning_popup(self, wdiget):
     wdiget.last_chance_message_box.exec()
 
     if wdiget.last_chance_message_box.clickedButton() == wdiget.yes_button:
-        wdiget.organize_images()
+        organize_images(self,wdiget)
 
 def highlight_selected(self, widget):
     ''' sets the style of the selected thumbnail '''
@@ -313,7 +313,7 @@ def build_dict(self, widget):
     widget.file_operation_dict = {}
     widget.category_folder_set = set()
 
-    widget.reset_image_list()
+    reset_image_list(self, widget)
 
     # populates lists with the names of all supported images files in the working directory
     for widget.file_name in os.listdir():
@@ -349,9 +349,10 @@ def rename_popup(self,widget):
 
     widget.rename_message_box.exec()
 
-    if self.rename_message_box.clickedButton() == widget.rename_yes_button:
+    if widget.rename_message_box.clickedButton() == widget.rename_yes_button:
         return True
-    else: return False
+    else: 
+        return False
 
 
 def build_file_operation_dict(self, widget):
@@ -364,3 +365,68 @@ def build_file_operation_dict(self, widget):
     widget.loading_msg_label.setText(f"{widget.current_image} added to {widget.category_name}")
     print(widget.file_operation_dict)
     organization_btn_status(self, widget)
+
+def organize_images(self, widget):
+    ''' Creates a folder in the working directory for every category,
+    and the moves all images to the folder of the category they're added to. '''
+    rename = rename_popup(self,widget)
+    
+    for widget.current_image, widget.category_name in widget.file_operation_dict.items():
+            widget.category_folder_set.add(widget.category_name)
+
+    for widget.category_name in widget.category_folder_set:
+        # creates a folder for every category
+        # if the folder already exists, it skips the creation
+        if os.path.exists(self.category_name) == False:
+            os.mkdir(f"{self.category_name}")
+    
+    for widget.current_image, widget.category_name in widget.file_operation_dict.items():
+        if widget.current_os == "Linux" or widget.current_os == "Darwin":
+            shutil.move(widget.current_image, f"{widget.working_directory}/{widget.category_name}")
+        else:
+            shutil.move(widget.current_image, f"{widget.working_directory}\\{widget.category_name}")
+    
+    if rename:
+        for folder in widget.category_folder_set:
+
+            if widget.current_os == "Linux" or widget.current_os == "Darwin":
+                os.chdir(f"{widget.working_directory}/{folder}")
+            else:
+                os.chdir(f"{widget.working_directory}\\{folder}")
+    
+            index = 0
+            for f in os.listdir():
+                f_name, f_ext = os.path.splitext(f)
+                new_name = "{}{}{}{}".format(folder, "0", index, f_ext)
+                os.rename(f, new_name)
+                index += 1
+        os.chdir(widget.working_directory)
+
+
+
+def reset_image_list(self, widget):
+    ''' Clears the list of image file names '''
+    if widget.image_files != []:
+        widget.selection_input.setText("")
+        widget.image_files.clear()
+
+def clear_thumbnails(self, widget):
+    ''' Removes all thumbnails that have previously been created. '''
+    for i in reversed(range(widget.bottom_layout.count())):
+        widget.bottom_layout.itemAt(i).widget().deleteLater()
+        QApplication.processEvents()
+
+def clear_img_display(self,widget):
+    ''' Removes the image in the main display '''
+    widget.image_display.clear()
+
+def clear_categories_tree(self,widget):
+    ''' Removes all items from the category view widget '''
+    widget.category_view.clear()
+
+def clear_cat_selector(self,widget):
+    ''' Removes all items from the selection menu '''
+    widget.category_selector.clear()
+    QApplication.processEvents()
+    widget.category_selector.addItem("--Select Category--")
+    set_category_index(self,widget)

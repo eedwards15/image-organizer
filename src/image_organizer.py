@@ -35,7 +35,6 @@ class MainWindow(QWidget):
         # Browse Directory Button
         self.browse_button = QtWidgets.QPushButton('Browse', self)
         self.browse_button.setMaximumWidth(75)
-        #self.browse_button.clicked.connect(self.folder_select)
         self.browse_button.clicked.connect(lambda: folder_select(self, self))
 
         # Select Directory and input
@@ -222,73 +221,6 @@ class MainWindow(QWidget):
 
         build_selector(self,self)
 
-    def organize_images(self):
-        ''' Creates a folder in the working directory for every category,
-        and the moves all images to the folder of the category they're added to. '''
-        rename = rename_popup(self,self)
-        
-        for self.current_image, self.category_name in self.file_operation_dict.items():
-                self.category_folder_set.add(self.category_name)
-
-        for self.category_name in self.category_folder_set:
-            # creates a folder for every category
-            # if the folder already exists, it skips the creation
-            if os.path.exists(self.category_name) == False:
-                os.mkdir(f"{self.category_name}")
-        
-        for self.current_image, self.category_name in self.file_operation_dict.items():
-            if self.current_os == "Linux" or self.current_os == "Darwin":
-                shutil.move(self.current_image, f"{self.working_directory}/{self.category_name}")
-            else:
-                shutil.move(self.current_image, f"{self.working_directory}\\{self.category_name}")
-        
-        if rename:
-            for folder in self.category_folder_set:
-
-                if self.current_os == "Linux" or self.current_os == "Darwin":
-                    os.chdir(f"{self.working_directory}/{folder}")
-                else:
-                    os.chdir(f"{self.working_directory}\\{folder}")
-      
-                index = 0
-                for f in os.listdir():
-                    f_name, f_ext = os.path.splitext(f)
-                    new_name = "{}{}{}{}".format(folder, "0", index, f_ext)
-                    os.rename(f, new_name)
-                    index += 1
-            os.chdir(self.working_directory)
-
-
-#######################################################################
-#############  Functions that remove and delete things   ##############
-#######################################################################
-
-    def reset_image_list(self):
-        ''' Clears the list of image file names '''
-        if self.image_files != []:
-            self.selection_input.setText("")
-            self.image_files.clear()
-
-    def clear_thumbnails(self):
-        ''' Removes all thumbnails that have previously been created. '''
-        for i in reversed(range(self.bottom_layout.count())):
-            self.bottom_layout.itemAt(i).widget().deleteLater()
-            QApplication.processEvents()
-
-    def clear_img_display(self):
-        ''' Removes the image in the main display '''
-        self.image_display.clear()
-
-    def clear_categories_tree(self):
-        ''' Removes all items from the category view widget '''
-        self.category_view.clear()
-
-    def clear_cat_selector(self):
-        ''' Removes all items from the selection menu '''
-        self.category_selector.clear()
-        QApplication.processEvents()
-        self.category_selector.addItem("--Select Category--")
-        set_category_index(self,self)
 
 if __name__ == '__main__':
     # Translate asset paths to useable format for PyInstaller
