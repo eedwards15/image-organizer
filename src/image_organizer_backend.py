@@ -31,7 +31,7 @@ def loading_msg_check(self, widget):
         if widget.bottom_layout.count() != 0:
             widget.clear_thumbnails()
             widget.clear_img_display()
-        widget.build_dict()
+        build_dict(self,widget)
 
 def create_working_directory(self, widget):
     ''' Assigns the input path to the current working directory '''
@@ -297,6 +297,40 @@ def organization_btn_status(self, widget):
         widget.organize_button.setDisabled(False)
     else:
         widget.organize_button.setDisabled(True)
+
+
+
+
+def build_dict(self, widget):
+    ''' Creates all the dictionaries, lists, and sets to be used,
+    then populates lists with names of supported image files in the working directory '''
+
+    # creates a list that will get populated with filenames
+    widget.image_files = []
+    widget.sorted_image_files = []
+    widget.image_index_list = []
+    widget.thumb_list = []
+    widget.file_operation_dict = {}
+    widget.category_folder_set = set()
+
+    widget.reset_image_list()
+
+    # populates lists with the names of all supported images files in the working directory
+    for widget.file_name in os.listdir():
+        img_extention_check(self, widget)
+        if img_extention_check(self, widget) == False: continue
+        widget.image_files.append(widget.file_name)
+        widget.sorted_image_files = sorted(widget.image_files, key=str.lower,)
+    if self.sorted_image_files != []:
+        populate_grid_view(self, widget)
+        display_images(self, widget)
+        add_wd_to_tree(self,widget)
+    elif widget.sorted_image_files == []:
+        widget.loading_msg_label.setText("No valid image files found. Please choose a different folder.")
+
+    cat_sel_func(self,widget)
+
+
 
 
 

@@ -222,34 +222,6 @@ class MainWindow(QWidget):
 
         build_selector(self,self)
 
-    def build_dict(self):
-        ''' Creates all the dictionaries, lists, and sets to be used,
-        then populates lists with names of supported image files in the working directory '''
-
-        # creates a list that will get populated with filenames
-        self.image_files = []
-        self.sorted_image_files = []
-        self.image_index_list = []
-        self.thumb_list = []
-        self.file_operation_dict = {}
-        self.category_folder_set = set()
-
-        self.reset_image_list()
-
-        # populates lists with the names of all supported images files in the working directory
-        for self.file_name in os.listdir():
-            img_extention_check(self, self)
-            if img_extention_check(self, self) == False: continue
-            self.image_files.append(self.file_name)
-            self.sorted_image_files = sorted(self.image_files, key=str.lower,)
-        if self.sorted_image_files != []:
-            populate_grid_view(self, self)
-            display_images(self, self)
-            add_wd_to_tree(self,self)
-        elif self.sorted_image_files == []:
-            self.loading_msg_label.setText("No valid image files found. Please choose a different folder.")
-
-        cat_sel_func(self,self)
 
 
     def build_file_operation_dict(self):
@@ -267,7 +239,7 @@ class MainWindow(QWidget):
     def organize_images(self):
         ''' Creates a folder in the working directory for every category,
         and the moves all images to the folder of the category they're added to. '''
-        rename = self.rename_popup()
+        rename = rename_popup(self,self)
         
         for self.current_image, self.category_name in self.file_operation_dict.items():
                 self.category_folder_set.add(self.category_name)
