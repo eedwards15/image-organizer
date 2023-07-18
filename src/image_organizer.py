@@ -55,7 +55,7 @@ class MainWindow(QWidget):
         self.new_category_input.setPlaceholderText("Create New Category...")
         self.new_category_input.setFont(self.itallic_font)
         self.new_category_input.resize(350,33)
-        self.new_category_input.textChanged[str].connect(self.create_btn_status)
+        self.new_category_input.textChanged[str].connect(lambda : create_btn_status(self, self))
         self.new_category_input.setDisabled(True)
 
         # Create Button
@@ -222,17 +222,6 @@ class MainWindow(QWidget):
 
         self.build_selector()
 
-
-
-
-    def create_btn_status(self):
-        ''' Disables and enables the create button when the conditions are met '''
-
-        if self.new_category_input.text() != "":
-            self.create_button.setDisabled(False)
-        elif self.new_category_input.text() == "":
-            self.create_button.setDisabled(True)
-
     def build_dict(self):
         ''' Creates all the dictionaries, lists, and sets to be used,
         then populates lists with names of supported image files in the working directory '''
@@ -249,40 +238,19 @@ class MainWindow(QWidget):
 
         # populates lists with the names of all supported images files in the working directory
         for self.file_name in os.listdir():
-            self.img_extention_check()
-            if self.img_extention_check() == False: continue
+            img_extention_check(self, self)
+            if img_extention_check(self, self) == False: continue
             self.image_files.append(self.file_name)
             self.sorted_image_files = sorted(self.image_files, key=str.lower,)
         if self.sorted_image_files != []:
             self.populate_grid_view()
-            self.display_images()
+            display_images(self, self)
             add_wd_to_tree(self,self)
         elif self.sorted_image_files == []:
             self.loading_msg_label.setText("No valid image files found. Please choose a different folder.")
 
         self.cat_sel_func()
 
-    def display_images(self):
-        ''' Displays the first image in the directory '''
-
-        self.import_button.setDisabled(True)
-        self.interactive_widgets_status()
-        self.image_index = 0
-        self.image = QImage(self.thumb_list[self.image_index])
-        self.image_display.setPixmap(QPixmap(self.image).scaled(700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
-        self.get_current_image()
-        self.highlight_selected()
-
-    def img_extention_check(self):
-        ''' Checks all files in the working directory for supported image formats '''
-
-        self.img_extentions = ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'pbm', 'pgm', 'ppm', 'tif', 'xbm', 'xpm']
-        self.three_char_extention = self.file_name[-3:]
-        self.four_char_extention = self.file_name[-4:]
-        if self.three_char_extention in self.img_extentions or self.four_char_extention in self.img_extentions:
-            return True
-        elif self.three_char_extention not in self.img_extentions or self.four_char_extention not in self.img_extentions:
-            return False
 
     def previous_image(self):
         ''' Allows for backward navigation '''
@@ -340,25 +308,11 @@ class MainWindow(QWidget):
         ''' runs the funtion when the category selection changes '''
         self.category_selector.currentIndexChanged.connect(self.interactive_widgets_status)
 
-    def set_category_index(self):
-        ''' finds the index of the selected category item '''
-        self.category_name = self.category_selector.currentText()
-        self.category_index = self.category_selector.findText(self.category_name, QtCore.Qt.MatchFlag.MatchFixedString)
-        self.category_selector.setCurrentIndex(self.category_index)
-
-    def add_btn_status(self):
-        ''' Disables and enables the add button when the conditions are met '''
-
-        if self.category_index != 0:
-            self.add_button.setDisabled(False)
-        elif self.category_index == 0:
-            self.add_button.setDisabled(True)
-
     def interactive_widgets_status(self):
         ''' Enables or disables all widgets with conditional dependencies '''
 
-        self.set_category_index()
-        self.add_btn_status()
+        set_category_index(self, self)
+        add_btn_status(self, self)
         if self.sorted_image_files != []:
             self.previous_button.setDisabled(False)
             self.next_button.setDisabled(False)
@@ -390,7 +344,7 @@ class MainWindow(QWidget):
             self.thumb_img.setPixmap(QPixmap(self.thumb_main_img).scaled(
                 125, 125, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
             self.thumb_frame = ClickFrame(self)
-            self.thumb_frame.clicked.connect(self.thumbnail_click)
+            self.thumb_frame.clicked.connect(lambda: thumbnail_click(self,self))
             self.thumb_frame.setSizePolicy(
                 QSizePolicy.Policy.Fixed,
                 QSizePolicy.Policy.Fixed)
@@ -417,19 +371,6 @@ class MainWindow(QWidget):
         self.thumb_selected.setStyleSheet("border: 1px solid rgb(42, 130, 218); background-color: rgb(42, 130, 218); color: white;")
         print(self.thumb_list[self.image_index])
 
-    def thumbnail_click(self):
-        ''' Get thumbnail that was clicked '''
-
-        self.clicked = self.sender()
-        self.image_index = self.thumb_dict[self.clicked.objectName()]
-        self.image = QImage(self.thumb_list[self.image_index])
-        self.image_display.setPixmap(QPixmap(self.image).scaled(
-                700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
-        print(self.clicked.objectName())
-        self.unhighlight_all()
-        self.show_category_if_categorized()
-        #sets the style of the selected thumbnail
-        self.clicked.setStyleSheet("border: 1px solid rgb(42, 130, 218); background-color: rgb(42, 130, 218); color: white;")
 
     def build_file_operation_dict(self):
         ''' Populates the dictionary that all file operations reference '''
@@ -477,12 +418,7 @@ class MainWindow(QWidget):
         if self.last_chance_message_box.clickedButton() == self.yes_button:
             self.organize_images()
 
-    def warning_button_clicked(self):
-        ''' If the user clicks the yes button, the file operations are executed '''
-        if self.warning_popup == QMessageBox.StandardButton.Yes:
-            self.organize_images()
-        elif self.warning_popup == QMessageBox.Cancel:
-            self.last_chance_message_box.Ignore()
+
 
     def organize_images(self):
         ''' Creates a folder in the working directory for every category,
@@ -570,7 +506,7 @@ class MainWindow(QWidget):
         self.category_selector.clear()
         QApplication.processEvents()
         self.category_selector.addItem("--Select Category--")
-        self.set_category_index()
+        set_category_index(self,self)
 
 if __name__ == '__main__':
     # Translate asset paths to useable format for PyInstaller
