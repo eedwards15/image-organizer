@@ -128,7 +128,7 @@ def thumbnail_click(self, widget):
     widget.image_display.setPixmap(QPixmap(widget.image).scaled(
             700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
     print(widget.clicked.objectName())
-    widget.unhighlight_all()
+    unhighlight_all(self, widget)
     widget.show_category_if_categorized()
     #sets the style of the selected thumbnail
     widget.clicked.setStyleSheet("border: 1px solid rgb(42, 130, 218); background-color: rgb(42, 130, 218); color: white;")
@@ -170,7 +170,7 @@ def previous_image(self, widget):
         widget.image = QImage(widget.thumb_list[widget.image_index])
         widget.image_display.setPixmap(QPixmap(widget.image).scaled(
             700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
-        widget.unhighlight_all()
+        unhighlight_all(self, widget)
         widget.highlight_selected()
     get_current_image(self, widget)
     widget.show_category_if_categorized()
@@ -183,7 +183,7 @@ def next_image(self, widget):
         widget.image = QImage(widget.thumb_list[widget.image_index])
         widget.image_display.setPixmap(QPixmap(widget.image).scaled(
             700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
-        widget.unhighlight_all()
+        unhighlight_all(self, widget)
         widget.highlight_selected()
     get_current_image(self,widget)
     widget.show_category_if_categorized()
@@ -249,3 +249,25 @@ def build_selector(self ,widget):
     widget.cat_sel_layout.addWidget(widget.add_button)
     # Adds the selector to right layout
     widget.right_layout.addWidget(widget.cat_frame)
+
+def unhighlight_all(self, widget):
+    ''' sets style of unselected thumbnails '''
+    for i in range(len(widget.bottom_layout)):
+        widget.thumb = widget.bottom_layout.itemAt(i).widget()
+        widget.thumb.setStyleSheet("border: none;")
+
+def organize_warning_popup(self, wdiget):
+    ''' Displays a popup message to make sure user wants to execute file operations '''
+    wdiget.last_chance_message_box = QMessageBox(wdiget)
+    wdiget.last_chance_message_box.setWindowTitle("WARNING!")
+    wdiget.last_chance_message_box.setIcon(QMessageBox.Icon.Warning)
+    wdiget.last_chance_message_box.setText("This operation cannot be undone! Do you wish to continue?")
+    wdiget.last_chance_message_box.setStandardButtons(QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No)
+    wdiget.yes_button = self.last_chance_message_box.button(QMessageBox.StandardButton.Yes)
+    wdiget.no_button = self.last_chance_message_box.button(QMessageBox.StandardButton.No)
+    wdiget.no_button.setText("Cancel")
+
+    wdiget.last_chance_message_box.exec()
+
+    if wdiget.last_chance_message_box.clickedButton() == wdiget.yes_button:
+        wdiget.organize_images()

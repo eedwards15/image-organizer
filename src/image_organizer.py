@@ -81,7 +81,7 @@ class MainWindow(QWidget):
         self.organize_button.setFont(self.big_font)
         self.organize_button.setFixedWidth(125)
         self.organize_button.setSizePolicy(QSizePolicy.Policy.Fixed,QSizePolicy.Policy.Preferred)
-        self.organize_button.clicked.connect(self.organize_warning_popup)
+        self.organize_button.clicked.connect(lambda: organize_warning_popup(self, self))
         self.organize_button.setDisabled(True)
 
 
@@ -253,11 +253,7 @@ class MainWindow(QWidget):
 
 
 
-    def unhighlight_all(self):
-        ''' sets style of unselected thumbnails '''
-        for i in range(len(self.bottom_layout)):
-            self.thumb = self.bottom_layout.itemAt(i).widget()
-            self.thumb.setStyleSheet("border: none;")
+
 
     def highlight_selected(self):
         ''' sets the style of the selected thumbnail '''
@@ -296,21 +292,7 @@ class MainWindow(QWidget):
         else:
             self.organize_button.setDisabled(True)
 
-    def organize_warning_popup(self):
-        ''' Displays a popup message to make sure user wants to execute file operations '''
-        self.last_chance_message_box = QMessageBox(self)
-        self.last_chance_message_box.setWindowTitle("WARNING!")
-        self.last_chance_message_box.setIcon(QMessageBox.Icon.Warning)
-        self.last_chance_message_box.setText("This operation cannot be undone! Do you wish to continue?")
-        self.last_chance_message_box.setStandardButtons(QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No)
-        self.yes_button = self.last_chance_message_box.button(QMessageBox.StandardButton.Yes)
-        self.no_button = self.last_chance_message_box.button(QMessageBox.StandardButton.No)
-        self.no_button.setText("Cancel")
 
-        self.last_chance_message_box.exec()
-
-        if self.last_chance_message_box.clickedButton() == self.yes_button:
-            self.organize_images()
 
 
 
