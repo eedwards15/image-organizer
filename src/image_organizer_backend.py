@@ -271,3 +271,9 @@ def organize_warning_popup(self, wdiget):
 
     if wdiget.last_chance_message_box.clickedButton() == wdiget.yes_button:
         wdiget.organize_images()
+
+def highlight_selected(self, widget):
+    ''' sets the style of the selected thumbnail '''
+    widget.thumb_selected = widget.findChild(ClickFrame, widget.thumb_list[widget.image_index])
+    widget.thumb_selected.setStyleSheet("border: 1px solid rgb(42, 130, 218); background-color: rgb(42, 130, 218); color: white;")
+    print(widget.thumb_list[widget.image_index])
