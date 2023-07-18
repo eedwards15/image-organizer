@@ -105,7 +105,7 @@ def display_images(self, widget):
     widget.image = QImage(widget.thumb_list[widget.image_index])
     widget.image_display.setPixmap(QPixmap(widget.image).scaled(700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
     get_current_image(self, widget)
-    widget.highlight_selected()
+    highlight_selected(self,widget)
 
 
 def img_extention_check(self, widget):
@@ -129,7 +129,7 @@ def thumbnail_click(self, widget):
             700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
     print(widget.clicked.objectName())
     unhighlight_all(self, widget)
-    widget.show_category_if_categorized()
+    show_category_if_categorized(self, widget)
     #sets the style of the selected thumbnail
     widget.clicked.setStyleSheet("border: 1px solid rgb(42, 130, 218); background-color: rgb(42, 130, 218); color: white;")
 
@@ -171,9 +171,9 @@ def previous_image(self, widget):
         widget.image_display.setPixmap(QPixmap(widget.image).scaled(
             700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
         unhighlight_all(self, widget)
-        widget.highlight_selected()
+        highlight_selected(self,widget)
     get_current_image(self, widget)
-    widget.show_category_if_categorized()
+    show_category_if_categorized(self, widget)
 
 def next_image(self, widget):
     ''' Allows for forward navigation '''
@@ -184,9 +184,9 @@ def next_image(self, widget):
         widget.image_display.setPixmap(QPixmap(widget.image).scaled(
             700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
         unhighlight_all(self, widget)
-        widget.highlight_selected()
+        highlight_selected(self,widget)
     get_current_image(self,widget)
-    widget.show_category_if_categorized()
+    show_category_if_categorized(self, widget)
 
 def get_current_image(self, widget):
     ''' Adds the current image file to a variable'''
@@ -289,3 +289,32 @@ def show_category_if_categorized(self, widget):
         widget.category_selector.setCurrentIndex(self.category_index)
     else:
         widget.category_selector.setCurrentIndex(0)
+
+
+def organization_btn_status(self, widget):
+    ''' Disables and enables the organize button when the conditions are met '''
+    if len(widget.file_operation_dict) != 0:
+        widget.organize_button.setDisabled(False)
+    else:
+        widget.organize_button.setDisabled(True)
+
+
+
+################################  Rename Files  ###################################
+
+def rename_popup(self,widget):
+    ''' Displays a popup message to ask if files should be renamed by category '''
+    widget.rename_message_box = QMessageBox(widget)
+    widget.rename_message_box.setWindowTitle("WARNING!")
+    widget.rename_message_box.setIcon(QMessageBox.Icon.Warning)
+    widget.rename_message_box.setText("Would you like to rename files by category?")
+    widget.rename_message_box.setStandardButtons(QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No)
+    widget.rename_yes_button = widget.rename_message_box.button(QMessageBox.StandardButton.Yes)
+    widget.no_button = widget.rename_message_box.button(QMessageBox.StandardButton.No)
+    widget.no_button.setText("No")
+
+    widget.rename_message_box.exec()
+
+    if self.rename_message_box.clickedButton() == widget.rename_yes_button:
+        return True
+    else: return False

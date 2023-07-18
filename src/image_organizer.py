@@ -252,19 +252,8 @@ class MainWindow(QWidget):
         cat_sel_func(self,self)
 
 
-
-
-
-    def highlight_selected(self):
-        ''' sets the style of the selected thumbnail '''
-        self.thumb_selected = self.findChild(ClickFrame, self.thumb_list[self.image_index])
-        self.thumb_selected.setStyleSheet("border: 1px solid rgb(42, 130, 218); background-color: rgb(42, 130, 218); color: white;")
-        print(self.thumb_list[self.image_index])
-
-
     def build_file_operation_dict(self):
         ''' Populates the dictionary that all file operations reference '''
-
         get_current_image(self, self)
         if self.file_operation_dict == {}:
             self.file_operation_dict = {self.current_image : self.category_name}
@@ -272,28 +261,7 @@ class MainWindow(QWidget):
             self.file_operation_dict[self.current_image] = self.category_name
         self.loading_msg_label.setText(f"{self.current_image} added to {self.category_name}")
         print(self.file_operation_dict)
-        self.organization_btn_status()
-
-    def show_category_if_categorized(self):
-        ''' If an image has been added to a category,
-        that category becomes the current item in the selector when the image is selected '''
-
-        get_current_image(self,self)
-        if self.current_image in self.file_operation_dict.keys():
-            self.category_index = self.category_selector.findText(self.file_operation_dict[self.current_image], QtCore.Qt.MatchFlag.MatchFixedString)
-            self.category_selector.setCurrentIndex(self.category_index)
-        else:
-            self.category_selector.setCurrentIndex(0)
-
-    def organization_btn_status(self):
-        ''' Disables and enables the organize button when the conditions are met '''
-        if len(self.file_operation_dict) != 0:
-            self.organize_button.setDisabled(False)
-        else:
-            self.organize_button.setDisabled(True)
-
-
-
+        organization_btn_status(self, self)
 
 
     def organize_images(self):
@@ -331,26 +299,6 @@ class MainWindow(QWidget):
                     os.rename(f, new_name)
                     index += 1
             os.chdir(self.working_directory)
-
-################################  Rename Files  ###################################
-
-    def rename_popup(self):
-        ''' Displays a popup message to ask if files should be renamed by category '''
-        self.rename_message_box = QMessageBox(self)
-        self.rename_message_box.setWindowTitle("WARNING!")
-        self.rename_message_box.setIcon(QMessageBox.Icon.Warning)
-        self.rename_message_box.setText("Would you like to rename files by category?")
-        self.rename_message_box.setStandardButtons(QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No)
-        self.rename_yes_button = self.rename_message_box.button(QMessageBox.StandardButton.Yes)
-        self.no_button = self.rename_message_box.button(QMessageBox.StandardButton.No)
-        self.no_button.setText("No")
-
-        self.rename_message_box.exec()
-
-        if self.rename_message_box.clickedButton() == self.rename_yes_button:
-            return True
-        else: return False
-
 
 
 #######################################################################
