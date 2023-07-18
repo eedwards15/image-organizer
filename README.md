@@ -30,6 +30,10 @@ A simple image organizer app created using python 3.9 and PyQt6.
     python3 image-organizer.py
 
 
+## Compile 
+    pyinstaller --onefile --windowed src/image_organizer.py
+
+
 # Documents: 
 
 [Change Log](./changelog.md)

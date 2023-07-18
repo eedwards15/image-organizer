@@ -1,3 +1,7 @@
 .DS_Store
 image-organizer-env
 env/
+
+build/
+
+dist/
