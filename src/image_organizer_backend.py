@@ -225,3 +225,27 @@ def populate_grid_view(self, widget):
         widget.thumb_dict = dict(zip(widget.thumb_list, widget.image_index_list))
         QApplication.processEvents()
     self.loading_msg_label.setText("Import complete")
+
+def build_selector(self ,widget):
+    ''' Creates the selection menu for the categories '''
+
+    # Category Selector
+    widget.category_selector = QtWidgets.QComboBox(widget)
+    widget.category_selector.setDisabled(True)
+    widget.category_selector.setSizePolicy(
+        QSizePolicy.Policy.Preferred,
+        QSizePolicy.Policy.Fixed)
+    # Add Button
+    widget.add_button =  QtWidgets.QPushButton('Add', widget)
+    widget.add_button.setSizePolicy( QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+    widget.add_button.clicked.connect(widget.build_file_operation_dict)
+    widget.add_button.setDisabled(True)
+    # Creates the category selector layout
+    widget.cat_frame = QtWidgets.QFrame(widget)
+    widget.cat_frame.setFrameShape(QFrame.Shape.StyledPanel)
+    widget.cat_frame.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+    widget.cat_sel_layout = QtWidgets.QHBoxLayout(widget.cat_frame)
+    widget.cat_sel_layout.addWidget(widget.category_selector)
+    widget.cat_sel_layout.addWidget(widget.add_button)
+    # Adds the selector to right layout
+    widget.right_layout.addWidget(widget.cat_frame)

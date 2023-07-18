@@ -220,7 +220,7 @@ class MainWindow(QWidget):
         # sets the parent/main layout
         self.setLayout(self.main_layout)
 
-        self.build_selector()
+        build_selector(self,self)
 
     def build_dict(self):
         ''' Creates all the dictionaries, lists, and sets to be used,
@@ -250,41 +250,6 @@ class MainWindow(QWidget):
             self.loading_msg_label.setText("No valid image files found. Please choose a different folder.")
 
         cat_sel_func(self,self)
-
-
-
-
-
-
-    def build_selector(self):
-        ''' Creates the selection menu for the categories '''
-
-        # Category Selector
-        self.category_selector = QtWidgets.QComboBox(self)
-        self.category_selector.setDisabled(True)
-        self.category_selector.setSizePolicy(
-            QSizePolicy.Policy.Preferred,
-            QSizePolicy.Policy.Fixed)
-        # Add Button
-        self.add_button =  QtWidgets.QPushButton('Add', self)
-        self.add_button.setSizePolicy( QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        self.add_button.clicked.connect(self.build_file_operation_dict)
-        self.add_button.setDisabled(True)
-        # Creates the category selector layout
-        self.cat_frame = QtWidgets.QFrame(self)
-        self.cat_frame.setFrameShape(QFrame.Shape.StyledPanel)
-        self.cat_frame.setSizePolicy(
-                QSizePolicy.Policy.Preferred,
-                QSizePolicy.Policy.Fixed)
-        self.cat_sel_layout = QtWidgets.QHBoxLayout(self.cat_frame)
-        self.cat_sel_layout.addWidget(self.category_selector)
-        self.cat_sel_layout.addWidget(self.add_button)
-        # Adds the selector to right layout
-        self.right_layout.addWidget(self.cat_frame)
-
-
-
-
 
 
 
