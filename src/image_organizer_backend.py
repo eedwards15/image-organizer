@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QApplication, QFrame, QFileDialog, QGraphicsPixmapIt
 from PyQt6.QtGui import QImage, QPixmap
 import sys, os, platform, shutil
 
- 
+from click_frame import ClickFrame
 
 
 
@@ -73,7 +73,7 @@ def create_new_category(self, widget):
         widget.category_selector.model().sort(0, QtCore.Qt.SortOrder.AscendingOrder)
         widget.new_category_input.clear()
         QApplication.processEvents()
-        widget.interactive_widgets_status()
+        interactive_widgets_status(self, widget)
 
 def create_btn_status(self, widget):
     ''' Disables and enables the create button when the conditions are met '''
@@ -100,11 +100,11 @@ def set_category_index(self, widget):
 def display_images(self, widget):
     ''' Displays the first image in the directory '''
     widget.import_button.setDisabled(True)
-    widget.interactive_widgets_status()
+    interactive_widgets_status(self, widget)
     widget.image_index = 0
     widget.image = QImage(widget.thumb_list[widget.image_index])
     widget.image_display.setPixmap(QPixmap(widget.image).scaled(700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
-    widget.get_current_image()
+    get_current_image(self, widget)
     widget.highlight_selected()
 
 
@@ -142,3 +142,86 @@ def warning_button_clicked(self, widget):
         widget.organize_images()
     elif widget.warning_popup == QMessageBox.Cancel:
         widget.last_chance_message_box.Ignore()
+
+def cat_sel_func(self, widget):
+    ''' runs the funtion when the category selection changes '''
+    widget.category_selector.currentIndexChanged.connect(lambda: interactive_widgets_status(self,widget))
+
+def interactive_widgets_status(self, widget):
+    ''' Enables or disables all widgets with conditional dependencies '''
+
+    set_category_index(self, self)
+    add_btn_status(self, self)
+    if widget.sorted_image_files != []:
+        widget.previous_button.setDisabled(False)
+        widget.next_button.setDisabled(False)
+        widget.category_selector.setDisabled(False)
+    else:
+        widget.previous_button.setDisabled(True)
+        widget.next_button.setDisabled(True)
+        widget.add_button.setDisabled(True)
+        widget.category_selector.setDisabled(True)
+
+def previous_image(self, widget):
+    ''' Allows for backward navigation '''
+
+    if widget.image_index != 0:
+        widget.image_index = widget.image_index-1
+        widget.image = QImage(widget.thumb_list[widget.image_index])
+        widget.image_display.setPixmap(QPixmap(widget.image).scaled(
+            700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
+        widget.unhighlight_all()
+        widget.highlight_selected()
+    get_current_image(self, widget)
+    widget.show_category_if_categorized()
+
+def next_image(self, widget):
+    ''' Allows for forward navigation '''
+
+    if widget.image_index < len(widget.sorted_image_files)-1:
+        widget.image_index = widget.image_index+1
+        widget.image = QImage(widget.thumb_list[widget.image_index])
+        widget.image_display.setPixmap(QPixmap(widget.image).scaled(
+            700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
+        widget.unhighlight_all()
+        widget.highlight_selected()
+    get_current_image(self,widget)
+    widget.show_category_if_categorized()
+
+def get_current_image(self, widget):
+    ''' Adds the current image file to a variable'''
+    widget.current_image = widget.sorted_image_files[widget.image_index]
+
+
+
+def populate_grid_view(self, widget):
+    ''' creates the thumbnails of every supported image in the working directory '''
+
+    for widget.image_index, widget.file_name in enumerate(widget.sorted_image_files):
+        widget.thumb_main_img = QImage(widget.sorted_image_files[widget.image_index])
+        widget.thumb_img = QLabel(self)
+        widget.thumb_txt = QLabel(self.file_name, self)
+        widget.image_index_list.append(self.image_index)
+        widget.thumb_txt.setSizePolicy(
+            QSizePolicy.Policy.Preferred,
+            QSizePolicy.Policy.MinimumExpanding)
+        widget.thumb_txt.setWordWrap(True)
+        widget.thumb_img.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        widget.thumb_txt.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        widget.thumb_img.setPixmap(QPixmap(self.thumb_main_img).scaled(
+            125, 125, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
+        widget.thumb_frame = ClickFrame(self)
+        widget.thumb_frame.clicked.connect(lambda: thumbnail_click(self,self))
+        widget.thumb_frame.setSizePolicy(
+            QSizePolicy.Policy.Fixed,
+            QSizePolicy.Policy.Fixed)
+        # assigns a name to every frame created so that they are directly accessible
+        widget.thumb_frame.setObjectName(widget.file_name)
+        widget.thumb_list.append(widget.thumb_frame.objectName())
+        widget.thumb_layout = QtWidgets.QVBoxLayout(widget.thumb_frame)
+        widget.thumb_layout.addWidget(widget.thumb_img)
+        widget.thumb_layout.addWidget(widget.thumb_txt)
+        widget.bottom_layout.addWidget(widget.thumb_frame)
+        widget.thumb_dict = dict(zip(widget.thumb_list, widget.image_index_list))
+        QApplication.processEvents()
+    self.loading_msg_label.setText("Import complete")

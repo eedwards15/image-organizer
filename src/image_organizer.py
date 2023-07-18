@@ -102,14 +102,14 @@ class MainWindow(QWidget):
         self.previous_button.setFont(self.big_font)
         self.previous_button.setMaximumWidth(25)
         self.previous_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
-        self.previous_button.clicked.connect(self.previous_image)
+        self.previous_button.clicked.connect(lambda : previous_image(self, self))
         self.previous_button.setDisabled(True)
 
         self.next_button = QtWidgets.QPushButton(">", self)
         self.next_button.setFont(self.big_font)
         self.next_button.setMaximumWidth(25)
         self.next_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
-        self.next_button.clicked.connect(self.next_image)
+        self.next_button.clicked.connect(lambda: next_image(self, self))
         self.next_button.setDisabled(True)
 
         # status bar
@@ -243,40 +243,18 @@ class MainWindow(QWidget):
             self.image_files.append(self.file_name)
             self.sorted_image_files = sorted(self.image_files, key=str.lower,)
         if self.sorted_image_files != []:
-            self.populate_grid_view()
+            populate_grid_view(self, self)
             display_images(self, self)
             add_wd_to_tree(self,self)
         elif self.sorted_image_files == []:
             self.loading_msg_label.setText("No valid image files found. Please choose a different folder.")
 
-        self.cat_sel_func()
+        cat_sel_func(self,self)
 
 
-    def previous_image(self):
-        ''' Allows for backward navigation '''
 
-        if self.image_index != 0:
-            self.image_index = self.image_index-1
-            self.image = QImage(self.thumb_list[self.image_index])
-            self.image_display.setPixmap(QPixmap(self.image).scaled(
-                700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
-            self.unhighlight_all()
-            self.highlight_selected()
-        self.get_current_image()
-        self.show_category_if_categorized()
 
-    def next_image(self):
-        ''' Allows for forward navigation '''
 
-        if self.image_index < len(self.sorted_image_files)-1:
-            self.image_index = self.image_index+1
-            self.image = QImage(self.thumb_list[self.image_index])
-            self.image_display.setPixmap(QPixmap(self.image).scaled(
-                700, 700, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
-            self.unhighlight_all()
-            self.highlight_selected()
-        self.get_current_image()
-        self.show_category_if_categorized()
 
     def build_selector(self):
         ''' Creates the selection menu for the categories '''
@@ -304,60 +282,11 @@ class MainWindow(QWidget):
         # Adds the selector to right layout
         self.right_layout.addWidget(self.cat_frame)
 
-    def cat_sel_func(self):
-        ''' runs the funtion when the category selection changes '''
-        self.category_selector.currentIndexChanged.connect(self.interactive_widgets_status)
 
-    def interactive_widgets_status(self):
-        ''' Enables or disables all widgets with conditional dependencies '''
 
-        set_category_index(self, self)
-        add_btn_status(self, self)
-        if self.sorted_image_files != []:
-            self.previous_button.setDisabled(False)
-            self.next_button.setDisabled(False)
-            self.category_selector.setDisabled(False)
-        else:
-            self.previous_button.setDisabled(True)
-            self.next_button.setDisabled(True)
-            self.add_button.setDisabled(True)
-            self.category_selector.setDisabled(True)
 
-    def get_current_image(self):
-        ''' Adds the current image file to a variable'''
-        self.current_image = self.sorted_image_files[self.image_index]
 
-    def populate_grid_view(self):
-        ''' creates the thumbnails of every supported image in the working directory '''
 
-        for self.image_index, self.file_name in enumerate(self.sorted_image_files):
-            self.thumb_main_img = QImage(self.sorted_image_files[self.image_index])
-            self.thumb_img = QLabel(self)
-            self.thumb_txt = QLabel(self.file_name, self)
-            self.image_index_list.append(self.image_index)
-            self.thumb_txt.setSizePolicy(
-                QSizePolicy.Policy.Preferred,
-                QSizePolicy.Policy.MinimumExpanding)
-            self.thumb_txt.setWordWrap(True)
-            self.thumb_img.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-            self.thumb_txt.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-            self.thumb_img.setPixmap(QPixmap(self.thumb_main_img).scaled(
-                125, 125, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
-            self.thumb_frame = ClickFrame(self)
-            self.thumb_frame.clicked.connect(lambda: thumbnail_click(self,self))
-            self.thumb_frame.setSizePolicy(
-                QSizePolicy.Policy.Fixed,
-                QSizePolicy.Policy.Fixed)
-            # assigns a name to every frame created so that they are directly accessible
-            self.thumb_frame.setObjectName(self.file_name)
-            self.thumb_list.append(self.thumb_frame.objectName())
-            self.thumb_layout = QtWidgets.QVBoxLayout(self.thumb_frame)
-            self.thumb_layout.addWidget(self.thumb_img)
-            self.thumb_layout.addWidget(self.thumb_txt)
-            self.bottom_layout.addWidget(self.thumb_frame)
-            self.thumb_dict = dict(zip(self.thumb_list, self.image_index_list))
-            QApplication.processEvents()
-        self.loading_msg_label.setText("Import complete")
 
     def unhighlight_all(self):
         ''' sets style of unselected thumbnails '''
@@ -375,7 +304,7 @@ class MainWindow(QWidget):
     def build_file_operation_dict(self):
         ''' Populates the dictionary that all file operations reference '''
 
-        self.get_current_image()
+        get_current_image(self, self)
         if self.file_operation_dict == {}:
             self.file_operation_dict = {self.current_image : self.category_name}
         else:
@@ -388,7 +317,7 @@ class MainWindow(QWidget):
         ''' If an image has been added to a category,
         that category becomes the current item in the selector when the image is selected '''
 
-        self.get_current_image()
+        get_current_image(self,self)
         if self.current_image in self.file_operation_dict.keys():
             self.category_index = self.category_selector.findText(self.file_operation_dict[self.current_image], QtCore.Qt.MatchFlag.MatchFixedString)
             self.category_selector.setCurrentIndex(self.category_index)
