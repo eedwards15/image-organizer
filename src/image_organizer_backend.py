@@ -238,7 +238,7 @@ def build_selector(self ,widget):
     # Add Button
     widget.add_button =  QtWidgets.QPushButton('Add', widget)
     widget.add_button.setSizePolicy( QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-    widget.add_button.clicked.connect(widget.build_file_operation_dict)
+    widget.add_button.clicked.connect(lambda:build_file_operation_dict(self, widget))
     widget.add_button.setDisabled(True)
     # Creates the category selector layout
     widget.cat_frame = QtWidgets.QFrame(widget)
@@ -352,3 +352,15 @@ def rename_popup(self,widget):
     if self.rename_message_box.clickedButton() == widget.rename_yes_button:
         return True
     else: return False
+
+
+def build_file_operation_dict(self, widget):
+    ''' Populates the dictionary that all file operations reference '''
+    get_current_image(self, widget)
+    if widget.file_operation_dict == {}:
+        widget.file_operation_dict = {widget.current_image : widget.category_name}
+    else:
+        widget.file_operation_dict[widget.current_image] = widget.category_name
+    widget.loading_msg_label.setText(f"{widget.current_image} added to {widget.category_name}")
+    print(widget.file_operation_dict)
+    organization_btn_status(self, widget)

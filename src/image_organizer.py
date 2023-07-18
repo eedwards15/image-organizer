@@ -222,20 +222,6 @@ class MainWindow(QWidget):
 
         build_selector(self,self)
 
-
-
-    def build_file_operation_dict(self):
-        ''' Populates the dictionary that all file operations reference '''
-        get_current_image(self, self)
-        if self.file_operation_dict == {}:
-            self.file_operation_dict = {self.current_image : self.category_name}
-        else:
-            self.file_operation_dict[self.current_image] = self.category_name
-        self.loading_msg_label.setText(f"{self.current_image} added to {self.category_name}")
-        print(self.file_operation_dict)
-        organization_btn_status(self, self)
-
-
     def organize_images(self):
         ''' Creates a folder in the working directory for every category,
         and the moves all images to the folder of the category they're added to. '''
