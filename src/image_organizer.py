@@ -18,6 +18,7 @@ class MainWindow(QWidget):
         self.thumb_list = []
         self.file_operation_dict = {}
         self.category_folder_set = set()
+        self.selection_input = ''
 
         self.initUI()
 
@@ -40,7 +41,7 @@ class MainWindow(QWidget):
         self.selection_input.setPlaceholderText("Path to Folder")
         self.selection_input.setFont(self.itallic_font)
         self.selection_input.resize(350,33)
-        self.selection_input.textChanged[str].connect(lambda: load_btn_status(self, self))
+        self.selection_input.textChanged[str].connect(lambda: on_selected_input_change(self, self))
 
         # Select Button
         self.import_button =  QtWidgets.QPushButton('Import', self)

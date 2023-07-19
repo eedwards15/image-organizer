@@ -9,17 +9,36 @@ from click_frame import ClickFrame
 
 
 def on_browse_click(self, widget):
-    widget.selection_input.clear()
+    ''' Opens a file dialog to select a folder '''
+    #widget.selection_input.clear()
     chosen_directory = QFileDialog.getExistingDirectory(widget)
     widget.selection_input.insert(chosen_directory)
     widget.input_text = widget.selection_input.text()
+    widget.import_button.setDisabled(False)
 
-def load_btn_status(self, widget):
-    ''' Disables and enables the load button when the conditions are met '''
-    if widget.selection_input.text() != "":
-        widget.import_button.setDisabled(False)
-    elif widget.selection_input.text() == "":
-        widget.import_button.setDisabled(True)
+def on_selected_input_change(self, widget):
+    ''' Enables the import button when the input field is not empty '''
+    selected_folder_empty = widget.selection_input.text() == ""
+    print(selected_folder_empty)
+    widget.selection_input.setDisabled(selected_folder_empty)
+
+def on_import_click(self, widget):
+    ''' Assigns the input path to the current working directory '''
+    if os.path.exists(widget.selection_input.text()) and widget.selection_input.text() != "":
+        widget.loading_msg_label.setText("Loading Images . . .")
+        widget.input_text = widget.selection_input.text() #rename this to something more descriptive
+        widget.working_directory = widget.input_text
+        os.chdir(widget.working_directory)
+        clear_categories_tree(self, widget)
+        clear_category_selector(self, widget)
+        clear_thumbnails(self, widget)
+        clear_img_display(self,widget)
+        build_dict(self,widget)  #refactor this method.       
+    else:
+        widget.invalid_path = QMessageBox(self)
+        widget.invalid_path.warning(self, "Attention", "Invalid file path!")
+
+
 
 def loading_msg_check(self, widget):
     ''' Clears all images and executes the build dictionary function when the status bar reads "Importing Images... '''
@@ -37,19 +56,6 @@ def loading_msg_check(self, widget):
             clear_thumbnails(self, widget)
             clear_img_display(self,widget)
         build_dict(self,widget)
-
-def on_import_click(self, widget):
-    ''' Assigns the input path to the current working directory '''
-    if os.path.exists(widget.selection_input.text()) and widget.selection_input.text() != "":
-        widget.input_text = widget.selection_input.text()
-        widget.working_directory = widget.input_text
-        os.chdir(widget.working_directory)
-        clear_categories_tree(self, widget)
-        clear_cat_selector(self, widget)
-        widget.loading_msg_label.setText("Importing Images . . .")
-    else:
-        widget.invalid_path = QMessageBox(self)
-        widget.invalid_path.warning(self, "Attention", "Invalid file path!")
 
 def add_wd_to_tree(self, widget):
     ''' Adds the working directory as the root item in the category view '''
@@ -225,11 +231,9 @@ def unhighlight_all(self, widget):
         widget.thumb = widget.bottom_layout.itemAt(i).widget()
         widget.thumb.setStyleSheet("border: none;")
 
-
 def on_organize_click(self, widget):
     ''' Displays a popup message to make sure user wants to execute file operations '''
     _organize_warning_popup(self, widget)
-
 
 def _organize_warning_popup(self, wdiget):
     #TODO: 
@@ -255,7 +259,6 @@ def highlight_selected(self, widget):
     widget.thumb_selected.setStyleSheet("border: 1px solid rgb(42, 130, 218); background-color: rgb(42, 130, 218); color: white;")
     print(widget.thumb_list[widget.image_index])
 
-
 def show_category_if_categorized(self, widget):
     ''' If an image has been added to a category,
     that category becomes the current item in the selector when the image is selected '''
@@ -267,16 +270,12 @@ def show_category_if_categorized(self, widget):
     else:
         widget.category_selector.setCurrentIndex(0)
 
-
 def organization_btn_status(self, widget):
     ''' Disables and enables the organize button when the conditions are met '''
     if len(widget.file_operation_dict) != 0:
         widget.organize_button.setDisabled(False)
     else:
         widget.organize_button.setDisabled(True)
-
-
-
 
 def build_dict(self, widget):
     ''' Creates all the dictionaries, lists, and sets to be used,
@@ -306,9 +305,6 @@ def build_dict(self, widget):
         widget.loading_msg_label.setText("No valid image files found. Please choose a different folder.")
 
     cat_sel_func(self,widget)
-
-
-
 
 
 ################################  Rename Files  ###################################
@@ -401,7 +397,7 @@ def clear_categories_tree(self,widget):
     ''' Removes all items from the category view widget '''
     widget.category_view.clear()
 
-def clear_cat_selector(self,widget):
+def clear_category_selector(self,widget):
     ''' Removes all items from the selection menu '''
     widget.category_selector.clear()
     QApplication.processEvents()
