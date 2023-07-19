@@ -8,12 +8,9 @@ import sys, os, platform, shutil
 from click_frame import ClickFrame
 
 
-
-def folder_select(self, widget):
-    ''' Assignes the selected path to the input box '''
+def on_browse_click(self, widget):
+    widget.selection_input.clear()
     chosen_directory = QFileDialog.getExistingDirectory(widget)
-    if chosen_directory != "":
-        widget.selection_input.clear()
     widget.selection_input.insert(chosen_directory)
     widget.input_text = widget.selection_input.text()
 
@@ -33,13 +30,21 @@ def loading_msg_check(self, widget):
             clear_img_display(self,widget)
         build_dict(self,widget)
 
-def create_working_directory(self, widget):
+
+    if "Refreshing . . ." in widget.loading_msg_label.text():
+        QApplication.processEvents()
+        if widget.bottom_layout.count() != 0:
+            clear_thumbnails(self, widget)
+            clear_img_display(self,widget)
+        build_dict(self,widget)
+
+def on_import_click(self, widget):
     ''' Assigns the input path to the current working directory '''
     if os.path.exists(widget.selection_input.text()) and widget.selection_input.text() != "":
         widget.input_text = widget.selection_input.text()
         widget.working_directory = widget.input_text
         os.chdir(widget.working_directory)
-        widget.clear_categories_tree()
+        clear_categories_tree(self, widget)
         clear_cat_selector(self, widget)
         widget.loading_msg_label.setText("Importing Images . . .")
     else:
@@ -51,19 +56,19 @@ def add_wd_to_tree(self, widget):
     widget.current_os = platform.system()
 
     if "/" in widget.working_directory:
-        widget.clear_categories_tree()
+        clear_categories_tree(self, widget)
         widget.image_folder = widget.working_directory.split("/")[-1]
         widget.WD_item = QtWidgets.QTreeWidgetItem(widget.category_view, [widget.image_folder])
         widget.WD_item.setExpanded(True)
         widget.category_view.addTopLevelItem(self.WD_item)
         widget.new_category_input.setDisabled(False)
     elif "\\" in widget.working_directory:
-        widget.clear_categories_tree()
+        clear_categories_tree(self, widget)
         widget.image_folder = widget.working_directory.split("\\")[-1]
         widget.WD_item = QtWidgets.QTreeWidgetItem(widget.category_view, [widget.image_folder])
         widget.category_view.addTopLevelItem(widget.WD_item)
 
-def create_new_category(self, widget):
+def on_create_category_click(self, widget):
     ''' Adds a new category to the category_view and category_selector widgets '''
 
     if widget.new_category_input.text() != "":
@@ -82,7 +87,6 @@ def create_btn_status(self, widget):
         widget.create_button.setDisabled(False)
     elif widget.new_category_input.text() == "":
         widget.create_button.setDisabled(True)
-
 
 def add_btn_status(self, widget):
     ''' Disables and enables the add button when the conditions are met '''
@@ -107,7 +111,6 @@ def display_images(self, widget):
     get_current_image(self, widget)
     highlight_selected(self,widget)
 
-
 def img_extention_check(self, widget):
     ''' Checks all files in the working directory for supported image formats '''
     widget.img_extentions = ['bmp', 'gif', 'jpg', 'jpeg', 'png', 'pbm', 'pgm', 'ppm', 'tif', 'xbm', 'xpm', 'webp']
@@ -118,7 +121,6 @@ def img_extention_check(self, widget):
     elif widget.three_char_extention not in widget.img_extentions or widget.four_char_extention not in widget.img_extentions:
         return False
     
-
 def thumbnail_click(self, widget):
     ''' Get thumbnail that was clicked '''
 
@@ -132,8 +134,6 @@ def thumbnail_click(self, widget):
     show_category_if_categorized(self, widget)
     #sets the style of the selected thumbnail
     widget.clicked.setStyleSheet("border: 1px solid rgb(42, 130, 218); background-color: rgb(42, 130, 218); color: white;")
-
-
 
 ## migt not be used not needed
 def warning_button_clicked(self, widget):
@@ -162,7 +162,7 @@ def interactive_widgets_status(self, widget):
         widget.add_button.setDisabled(True)
         widget.category_selector.setDisabled(True)
 
-def previous_image(self, widget):
+def on_previous_image_click(self, widget):
     ''' Allows for backward navigation '''
 
     if widget.image_index != 0:
@@ -175,7 +175,7 @@ def previous_image(self, widget):
     get_current_image(self, widget)
     show_category_if_categorized(self, widget)
 
-def next_image(self, widget):
+def on_next_image_click(self, widget):
     ''' Allows for forward navigation '''
 
     if widget.image_index < len(widget.sorted_image_files)-1:
@@ -192,8 +192,6 @@ def get_current_image(self, widget):
     ''' Adds the current image file to a variable'''
     widget.current_image = widget.sorted_image_files[widget.image_index]
 
-
-
 def populate_grid_view(self, widget):
     ''' creates the thumbnails of every supported image in the working directory '''
 
@@ -202,19 +200,14 @@ def populate_grid_view(self, widget):
         widget.thumb_img = QLabel(self)
         widget.thumb_txt = QLabel(self.file_name, self)
         widget.image_index_list.append(self.image_index)
-        widget.thumb_txt.setSizePolicy(
-            QSizePolicy.Policy.Preferred,
-            QSizePolicy.Policy.MinimumExpanding)
+        widget.thumb_txt.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.MinimumExpanding)
         widget.thumb_txt.setWordWrap(True)
         widget.thumb_img.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         widget.thumb_txt.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        widget.thumb_img.setPixmap(QPixmap(self.thumb_main_img).scaled(
-            125, 125, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
+        widget.thumb_img.setPixmap(QPixmap(self.thumb_main_img).scaled(125, 125, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
         widget.thumb_frame = ClickFrame(self)
         widget.thumb_frame.clicked.connect(lambda: thumbnail_click(self,self))
-        widget.thumb_frame.setSizePolicy(
-            QSizePolicy.Policy.Fixed,
-            QSizePolicy.Policy.Fixed)
+        widget.thumb_frame.setSizePolicy( QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         # assigns a name to every frame created so that they are directly accessible
         widget.thumb_frame.setObjectName(widget.file_name)
         widget.thumb_list.append(widget.thumb_frame.objectName())
@@ -226,37 +219,21 @@ def populate_grid_view(self, widget):
         QApplication.processEvents()
     self.loading_msg_label.setText("Import complete")
 
-def build_selector(self ,widget):
-    ''' Creates the selection menu for the categories '''
-
-    # Category Selector
-    widget.category_selector = QtWidgets.QComboBox(widget)
-    widget.category_selector.setDisabled(True)
-    widget.category_selector.setSizePolicy(
-        QSizePolicy.Policy.Preferred,
-        QSizePolicy.Policy.Fixed)
-    # Add Button
-    widget.add_button =  QtWidgets.QPushButton('Add', widget)
-    widget.add_button.setSizePolicy( QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-    widget.add_button.clicked.connect(lambda:build_file_operation_dict(self, widget))
-    widget.add_button.setDisabled(True)
-    # Creates the category selector layout
-    widget.cat_frame = QtWidgets.QFrame(widget)
-    widget.cat_frame.setFrameShape(QFrame.Shape.StyledPanel)
-    widget.cat_frame.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
-    widget.cat_sel_layout = QtWidgets.QHBoxLayout(widget.cat_frame)
-    widget.cat_sel_layout.addWidget(widget.category_selector)
-    widget.cat_sel_layout.addWidget(widget.add_button)
-    # Adds the selector to right layout
-    widget.right_layout.addWidget(widget.cat_frame)
-
 def unhighlight_all(self, widget):
     ''' sets style of unselected thumbnails '''
     for i in range(len(widget.bottom_layout)):
         widget.thumb = widget.bottom_layout.itemAt(i).widget()
         widget.thumb.setStyleSheet("border: none;")
 
-def organize_warning_popup(self, wdiget):
+
+def on_organize_click(self, widget):
+    ''' Displays a popup message to make sure user wants to execute file operations '''
+    _organize_warning_popup(self, widget)
+
+
+def _organize_warning_popup(self, wdiget):
+    #TODO: 
+    # move this to the GUI Helper. 
     ''' Displays a popup message to make sure user wants to execute file operations '''
     wdiget.last_chance_message_box = QMessageBox(wdiget)
     wdiget.last_chance_message_box.setWindowTitle("WARNING!")
@@ -305,15 +282,14 @@ def build_dict(self, widget):
     ''' Creates all the dictionaries, lists, and sets to be used,
     then populates lists with names of supported image files in the working directory '''
 
-    # creates a list that will get populated with filenames
-    widget.image_files = []
-    widget.sorted_image_files = []
-    widget.image_index_list = []
-    widget.thumb_list = []
-    widget.file_operation_dict = {}
-    widget.category_folder_set = set()
-
-    reset_image_list(self, widget)
+    if widget.image_files != []:
+        widget.image_files = []
+        widget.sorted_image_files = []
+        widget.file_operation_dict = {}
+        reset_image_list(self, widget)
+        populate_grid_view(self, widget)
+    else: 
+        reset_image_list(self, widget)
 
     # populates lists with the names of all supported images files in the working directory
     for widget.file_name in os.listdir():
@@ -321,6 +297,7 @@ def build_dict(self, widget):
         if img_extention_check(self, widget) == False: continue
         widget.image_files.append(widget.file_name)
         widget.sorted_image_files = sorted(widget.image_files, key=str.lower,)
+    
     if self.sorted_image_files != []:
         populate_grid_view(self, widget)
         display_images(self, widget)
@@ -353,7 +330,6 @@ def rename_popup(self,widget):
         return True
     else: 
         return False
-
 
 def build_file_operation_dict(self, widget):
     ''' Populates the dictionary that all file operations reference '''
@@ -402,7 +378,8 @@ def organize_images(self, widget):
                 index += 1
         os.chdir(widget.working_directory)
 
-
+    widget.loading_msg_label.setText("Importing Images . . ." )
+    QApplication.processEvents()
 
 def reset_image_list(self, widget):
     ''' Clears the list of image file names '''

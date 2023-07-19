@@ -1,41 +1,39 @@
+import sys, os
 from PyQt6 import QtCore, QtGui, QtWidgets
-# from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication, QFrame, QFileDialog, QGraphicsPixmapItem, QGraphicsScene,\
-    QGraphicsView, QGridLayout,QLineEdit, QLabel, QMessageBox, QSizePolicy, QSplitter, QWidget
-from PyQt6.QtGui import QImage, QPixmap
-import sys, os, platform, shutil
-
-from click_frame import ClickFrame
+from PyQt6.QtWidgets import  QFrame,QLineEdit, QLabel,  QSizePolicy, QSplitter, QWidget
 from constants import *
 from image_organizer_backend import *
-
-# qtmodern.styles
+from helpers.gui import GuiHelper
 
 class MainWindow(QWidget):
 
     def __init__(self, *args, **kwargs):
         '''MainWindow Constructor'''
         super().__init__(*args, **kwargs)
+        self.gui_helper = GuiHelper()
         self.title = Constants.TITLE
-        self.width = Constants.WIDTH
-        self.height = Constants.HEIGHT
+        self.image_files = []
+        self.sorted_image_files = []
+        self.image_index_list = []
+        self.thumb_list = []
+        self.file_operation_dict = {}
+        self.category_folder_set = set()
+
         self.initUI()
+
+
 
     def initUI(self):
         self.setWindowTitle(self.title)
-        self.resize(self.width, self.height)
+        self.resize(Constants.WIDTH,  Constants.HEIGHT)
 
-        # Create Font Style Options
-        self.itallic_font = QtGui.QFont()
-        self.itallic_font.setItalic(True)
-        self.big_font = QtGui.QFont()
-        self.big_font.setPointSize(16)
-        self.big_font.setBold(True)
+        self.itallic_font = self.gui_helper.createFont(italic=True, size=10)
+        self.big_font = self.gui_helper.createFont(bold=True, size=12)
 
         # Browse Directory Button
         self.browse_button = QtWidgets.QPushButton('Browse', self)
         self.browse_button.setMaximumWidth(75)
-        self.browse_button.clicked.connect(lambda: folder_select(self, self))
+        self.browse_button.clicked.connect(lambda: on_browse_click(self, self))
 
         # Select Directory and input
         self.selection_input = QtWidgets.QLineEdit(self)
@@ -46,7 +44,7 @@ class MainWindow(QWidget):
 
         # Select Button
         self.import_button =  QtWidgets.QPushButton('Import', self)
-        self.import_button.clicked.connect(lambda: create_working_directory(self, self))
+        self.import_button.clicked.connect(lambda: on_import_click(self, self))
         self.import_button.setDisabled(True)
 
         # new category input
@@ -60,7 +58,7 @@ class MainWindow(QWidget):
         # Create Button
         self.create_button =  QtWidgets.QPushButton('Create', self)
         self.create_button.setDisabled(True)
-        self.create_button.clicked.connect(lambda: create_new_category(self, self))
+        self.create_button.clicked.connect(lambda: on_create_category_click(self, self))
 
         # Category Tree View
         self.category_view = QtWidgets.QTreeWidget(self)
@@ -76,11 +74,13 @@ class MainWindow(QWidget):
         self.organization_label.setFont(self.itallic_font)
         self.organization_label.setWordWrap(True)
         self.organization_label.setSizePolicy(QSizePolicy.Policy.MinimumExpanding,QSizePolicy.Policy.MinimumExpanding)
+        
+        #Oranize Button
         self.organize_button = QtWidgets.QPushButton('Organize', self)
         self.organize_button.setFont(self.big_font)
         self.organize_button.setFixedWidth(125)
         self.organize_button.setSizePolicy(QSizePolicy.Policy.Fixed,QSizePolicy.Policy.Preferred)
-        self.organize_button.clicked.connect(lambda: organize_warning_popup(self, self))
+        self.organize_button.clicked.connect(lambda: on_organize_click(self, self))
         self.organize_button.setDisabled(True)
 
 
@@ -101,14 +101,14 @@ class MainWindow(QWidget):
         self.previous_button.setFont(self.big_font)
         self.previous_button.setMaximumWidth(25)
         self.previous_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
-        self.previous_button.clicked.connect(lambda : previous_image(self, self))
+        self.previous_button.clicked.connect(lambda : on_previous_image_click(self, self))
         self.previous_button.setDisabled(True)
 
         self.next_button = QtWidgets.QPushButton(">", self)
         self.next_button.setFont(self.big_font)
         self.next_button.setMaximumWidth(25)
         self.next_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
-        self.next_button.clicked.connect(lambda: next_image(self, self))
+        self.next_button.clicked.connect(lambda: on_next_image_click(self, self))
         self.next_button.setDisabled(True)
 
         # status bar
@@ -124,7 +124,7 @@ class MainWindow(QWidget):
         # version number
         self.version_label = QLineEdit(self)
         self.version_label.setStyleSheet( "border: 1px solid rgb(42,42,42); background-color:transparent; color: rgb(127,127,127);")
-        self.version_label.setText('Created by: Daniel Lukas v0.3.2alpha')
+        self.version_label.setText('v0.4.0')
         self.version_label.setDisabled(True)
         self.version_label.setFont(self.itallic_font)
         self.version_label.setFixedWidth(225)
@@ -212,14 +212,38 @@ class MainWindow(QWidget):
         self.status_layout = QtWidgets.QHBoxLayout()
         self.status_layout.addWidget(self.loading_msg_label,3)
         self.status_layout.addWidget(self.version_label,1)
+       
         # add sub_layouts to main layout
         self.main_layout.addWidget(self.top_frame)
         self.main_layout.addWidget(self.vertical_splitter)
         self.main_layout.addLayout(self.status_layout)
+
         # sets the parent/main layout
         self.setLayout(self.main_layout)
 
-        build_selector(self,self)
+        # Category Selector
+        self.category_selector = QtWidgets.QComboBox(self)
+        self.category_selector.setDisabled(True)
+        self.category_selector.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        # Add Button
+        self.add_button =  QtWidgets.QPushButton('Add', self)
+        self.add_button.setSizePolicy( QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.add_button.clicked.connect(lambda:build_file_operation_dict(self, self))
+        self.add_button.setDisabled(True)
+
+        # Creates the category selector layout
+        self.cat_frame = QtWidgets.QFrame(self)
+        self.cat_frame.setFrameShape(QFrame.Shape.StyledPanel)
+        self.cat_frame.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        self.cat_sel_layout = QtWidgets.QHBoxLayout(self.cat_frame)
+        self.cat_sel_layout.addWidget(self.category_selector)
+        self.cat_sel_layout.addWidget(self.add_button)
+
+        # Adds the selector to right layout
+        self.right_layout.addWidget(self.cat_frame)
+
+
+
 
 
 if __name__ == '__main__':
